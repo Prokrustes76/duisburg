@@ -290,7 +290,7 @@ li {
     }
 
     function loop() {
-      frage.innerHTML = `Frage: ${round + 1} / ${anzahlRunden}`
+      frage.innerHTML = `Frage: ${Math.min(anzahlRunden, round + 1)} / ${anzahlRunden}`
       punkte.innerHTML = `Richtige: ${score}`
       if (round < anzahlRunden) {
         size = [img.width, img.height]
