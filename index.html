@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Bild + Canvas + Liste</title>
+  <style>
+    html, body {
+      max-width: 700px;
+      user-select: none;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    main {
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+    }
+
+.map-container {
+  flex: 2;
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.map-container img {
+  display: block;
+  height: 100vh;
+  width: auto;
+}
+
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: auto;
+  pointer-events: none;
+}
+
+.list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0f0f0;
+  padding: 0;
+  margin: 0 auto; 
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 6;
+}
+
+h3 {
+  margin: 2vh
+}
+
+#score {
+  flex: 1;
+}
+
+li {
+  background-color: rgb(226,226,226);
+  font-size: 3vh;
+  margin: 2vh;
+  border: solid;
+  padding: 1vh 2vh;
+}
+
+  </style>
+</head>
+<body>
+  <main>
+    <div class="map-container">
+      <canvas id="C"></canvas>
+      <img src="gesamt.png" id="mapImage" alt="Karte">
+    </div>
+
+    <div class="list">
+      <div id='score'>
+         <h3 id='frage'></h3>
+         <h3 id='punkte'></h3>
+      </div>
+      <ul id='listOptionen'></ul>
+    </div>
+  </main>
+
+  <script>
+    class Bezirk {
+      constructor(i) {
+         this.id = i
+	 this.name = this.getName(i)
+         this.pos  = this.getPos(i)
+      }
+
+      getName(i) {
+        return [
+         'Alt-Walsum',
+         'Overbruch',
+         'Vierlinden',
+	 'Aldenrade',
+         'Wehofen',
+         'Baerl',
+         'Fahrn',
+         'Röttgersbach',
+         'Marxloh',
+         'Obermarxloh',
+         'Neumühl',
+         'Alt-Hamborn',
+         'Bruckhausen',
+         'Beeckerwerth',
+         'Hochheide',
+         'Homberg',
+         'Beeck',
+         'Laar',
+         'Obermeiderich',
+         'Mittelmeiderich',
+         'Untermeiderich',
+         'Ruhrort',
+         'Bergheim',
+         'Neuenkamp',
+         'Kasslerfeld',
+         'Altstadt',
+         'Duissern',
+         'Dellviertel',
+         'Hochemmerich',
+         'Hochfeld',
+         'Neudorf-Nord',
+         'Neudorf-Süd',
+         'Wannheimerort',
+         'Bissingheim',
+         'Wedau',
+         'Rahm',
+         'Großenbaum',
+         'Buchholz',
+         'Rumeln-Kaldenhausen',
+         'Rheinhausen-Mitte',
+         'Friemersheim',
+         'Mündelheim',
+         'Hüttenheim',
+         'Ungelsheim',
+         'Huckingen',
+         'Wannheim-Angerhausen',
+        ][i]
+      }
+
+      getPos(i) {
+        return [
+         [143,  83],
+         [175,  48],
+         [195,  72],
+         [225, 103],
+         [263, 100],
+         [ 92, 188],
+         [207, 134],
+         [295, 145],
+         [214, 177],
+         [285, 182],
+         [332, 195],
+         [264, 208],
+         [214, 219],
+         [151, 239],
+         [118, 337],
+         [150, 310],
+         [215, 248],
+         [205, 289],
+         [314, 247],
+         [277, 282],
+         [244, 273],
+         [236, 324],
+         [113, 417],
+         [200, 383],
+         [220, 360],
+         [260, 370],
+         [316, 356],
+         [270, 400],
+         [177, 431],
+         [231, 422],
+         [327, 391],
+         [321, 437],
+         [264, 470],
+         [350, 500],
+         [325, 520],
+         [336, 592],
+         [295, 568],
+         [277, 526],
+         [ 74, 481],
+         [168, 472],
+         [150, 520],
+         [129, 614],
+         [181, 577],
+         [212, 612],
+         [244, 583],
+         [233, 516]        
+         ][i]
+      }
+    }
+
+
+    const img = document.getElementById("mapImage");
+    const canvas = document.getElementById("C");
+    const ctx = canvas.getContext("2d");
+    let good = new Audio()
+    let bad = new Audio()
+    let bezirke = []
+    let alleNamen = []
+    let round = 0
+    let auswahl = []
+    let optionen = []
+    let time = 0
+    let score = 0
+    let size
+    let anzahlOptionen = 8
+    let anzahlRunden = 20
+    let ul = document.getElementById('listOptionen')
+    let frage = document.getElementById('frage')
+    
+    good.src = 'good.wav'
+    bad.src = 'bad.wav'
+
+    img.onload = () => {
+      canvas.width = img.clientWidth;
+      canvas.height = img.clientHeight;
+      size = [img.width, img.height]
+      init()
+    };
+
+    function init() {
+      for (let i = 0; i < 46; i++) {
+        bezirke.push(new Bezirk(i))
+        alleNamen.push(bezirke[i].name)
+      }
+      getAuswahl()
+      nextRound()
+      loop()
+    }
+
+    function getAuswahl() {
+      for (let i = 0; i < anzahlRunden; i++) {
+        let zuf = Math.floor(Math.random() * bezirke.length)
+        let teil = bezirke.splice(zuf, 1)[0]
+        auswahl.push(teil)
+      }
+    }
+
+    function getOptions() {
+       if (round >= anzahlRunden)
+         return
+       optionen = [auswahl[round].name]
+       ul.innerHTML = '';
+       while (optionen.length < anzahlOptionen) {
+         let zuf = Math.floor(Math.random() * alleNamen.length)
+         if (optionen.includes(alleNamen[zuf]))
+           continue
+         optionen.push(alleNamen[zuf])
+       }
+       optionen.sort((a, b) => Math.random() - Math.random())
+
+       for (let o of optionen) {
+         let elem = document.createElement('li')
+         elem.innerHTML = o
+         elem.addEventListener('click', choose)
+         ul.appendChild(elem)
+       }
+    }
+
+    function choose() {   
+      if (auswahl[round].name == this.innerHTML) {
+        score++
+	good.play()
+      }
+      else
+        bad.play()
+
+      if (round < anzahlRunden) {
+      	round++
+        nextRound()
+      }
+    }
+
+    function nextRound() {
+      getOptions()
+    }
+
+    function loop() {
+      frage.innerHTML = `Frage: ${round + 1} / ${anzahlRunden}`
+      punkte.innerHTML = `Richtige: ${score}`
+      if (round < anzahlRunden) {
+        size = [img.width, img.height]
+        time++
+        ctx.clearRect(0, 0, size[0], size[1])
+        showCircle(auswahl[round].pos)
+        requestAnimationFrame(loop)
+      }
+      else {
+        ctx.fillStyle = 'red'
+        ctx.textAlign = 'center'
+        ctx.font = `${size[0] / 5}px Arial`
+        ctx.fillText("Das war's!", size[0] / 2, size[1] / 2)
+      }
+    }
+
+    function showCircle(pos) {
+      let x = pos[0] * size[0] / 400
+      let y = pos[1] * size[1] / 682
+      let rad = 10 * size[0] / 400
+      let val = (time % 60) / 60
+      ctx.fillStyle = `rgba(255, 0, 0, ${val})`
+      ctx.beginPath()
+      ctx.arc(x, y, rad, Math.PI * 2, 0)
+      ctx.fill()
+    }
+  </script>
+</body>
+</html>
