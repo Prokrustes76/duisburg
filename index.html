@@ -59,19 +59,35 @@ ul {
 }
 
 h3 {
-  margin: 2vh
+  margin: 1vh
 }
 
 #score {
-  flex: 1;
+  margin: 2vh;
+  background: linear-gradient(145deg, #aaaaaa, #dddddd);
+  border-left: 5px solid #8e44ad; 
+  border-bottom: 5px solid #8e44ad; 
+  padding: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  font-family: sans-serif;
+  color: #222;
+  max-width: 300px;
+  border-radius: 8px;
 }
 
 li {
-  background-color: rgb(226,226,226);
+  background-color: #cdcdcd;
   font-size: 3vh;
   margin: 2vh;
-  border: solid;
+  border: rgb(116,46,116) solid;
+  border-radius: 12px;
   padding: 1vh 2vh;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+li:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
   </style>
@@ -93,115 +109,35 @@ li {
   </main>
 
   <script>
-    class Bezirk {
-      constructor(i) {
-         this.id = i
-	 this.name = this.getName(i)
-         this.pos  = this.getPos(i)
-      }
+    const names = [...Array(46)].map((_, i) => [
+    'Alt-Walsum','Overbruch','Vierlinden','Aldenrade','Wehofen','Baerl','Fahrn','Röttgersbach','Marxloh','Obermarxloh',
+    'Neumühl','Alt-Hamborn','Bruckhausen','Beeckerwerth','Hochheide','Homberg','Beeck','Laar','Obermeiderich',
+    'Mittelmeiderich','Untermeiderich','Ruhrort','Bergheim','Neuenkamp','Kasslerfeld','Altstadt','Duissern','Dellviertel',
+    'Hochemmerich','Hochfeld','Neudorf-Nord','Neudorf-Süd','Wannheimerort','Bissingheim','Wedau','Rahm','Großenbaum',
+    'Buchholz','Rumeln-Kaldenhausen','Rheinhausen-Mitte','Friemersheim','Mündelheim','Hüttenheim','Ungelsheim',
+    'Huckingen','Wannheim-Angerhausen'
+     ][i]);
+    const pos = [...Array(46)].map((_, i) => [
+    [143,83],[175,48],[195,72],[225,103],[263,100],[92,188],[207,134],[295,145],[214,177],[285,182],
+    [332,195],[264,208],[214,219],[151,239],[118,337],[150,310],[215,248],[205,289],[314,247],
+    [277,282],[244,273],[236,324],[113,417],[200,383],[220,360],[260,370],[316,356],[270,400],
+    [177,431],[231,422],[327,391],[321,437],[264,470],[350,500],[325,520],[336,592],[295,568],
+    [277,526],[74,481],[168,472],[150,520],[129,614],[181,577],[212,612],[244,583],[233,516]
+    ][i]);
 
-      getName(i) {
-        return [
-         'Alt-Walsum',
-         'Overbruch',
-         'Vierlinden',
-	 'Aldenrade',
-         'Wehofen',
-         'Baerl',
-         'Fahrn',
-         'Röttgersbach',
-         'Marxloh',
-         'Obermarxloh',
-         'Neumühl',
-         'Alt-Hamborn',
-         'Bruckhausen',
-         'Beeckerwerth',
-         'Hochheide',
-         'Homberg',
-         'Beeck',
-         'Laar',
-         'Obermeiderich',
-         'Mittelmeiderich',
-         'Untermeiderich',
-         'Ruhrort',
-         'Bergheim',
-         'Neuenkamp',
-         'Kasslerfeld',
-         'Altstadt',
-         'Duissern',
-         'Dellviertel',
-         'Hochemmerich',
-         'Hochfeld',
-         'Neudorf-Nord',
-         'Neudorf-Süd',
-         'Wannheimerort',
-         'Bissingheim',
-         'Wedau',
-         'Rahm',
-         'Großenbaum',
-         'Buchholz',
-         'Rumeln-Kaldenhausen',
-         'Rheinhausen-Mitte',
-         'Friemersheim',
-         'Mündelheim',
-         'Hüttenheim',
-         'Ungelsheim',
-         'Huckingen',
-         'Wannheim-Angerhausen',
-        ][i]
-      }
-
-      getPos(i) {
-        return [
-         [143,  83],
-         [175,  48],
-         [195,  72],
-         [225, 103],
-         [263, 100],
-         [ 92, 188],
-         [207, 134],
-         [295, 145],
-         [214, 177],
-         [285, 182],
-         [332, 195],
-         [264, 208],
-         [214, 219],
-         [151, 239],
-         [118, 337],
-         [150, 310],
-         [215, 248],
-         [205, 289],
-         [314, 247],
-         [277, 282],
-         [244, 273],
-         [236, 324],
-         [113, 417],
-         [200, 383],
-         [220, 360],
-         [260, 370],
-         [316, 356],
-         [270, 400],
-         [177, 431],
-         [231, 422],
-         [327, 391],
-         [321, 437],
-         [264, 470],
-         [350, 500],
-         [325, 520],
-         [336, 592],
-         [295, 568],
-         [277, 526],
-         [ 74, 481],
-         [168, 472],
-         [150, 520],
-         [129, 614],
-         [181, 577],
-         [212, 612],
-         [244, 583],
-         [233, 516]        
-         ][i]
-      }
+  class Bezirk {
+    constructor(id) {
+      this.id = id;
+      this.name = names[id];
+      this.pos = pos[id];
     }
+  }
+
+    window.addEventListener('resize',e=> {
+      canvas.width = img.clientWidth;
+      canvas.height = img.clientHeight;
+      size = [img.width, img.height]
+    })
 
 
     const img = document.getElementById("mapImage");
@@ -271,19 +207,38 @@ li {
        }
     }
 
-    function choose() {   
-      if (auswahl[round].name == this.innerHTML) {
-        score++
-	good.play()
-      }
-      else
-        bad.play()
+function choose() {
+  const clicked = this;
+  const richtigeAntwort = auswahl[round].name;
 
-      if (round < anzahlRunden) {
-      	round++
-        nextRound()
-      }
+  // Deaktiviere weitere Klicks
+  const lis = ul.querySelectorAll('li');
+  lis.forEach(li => li.removeEventListener('click', choose));
+
+  // Richtig/Falsch-Sound
+  if (clicked.innerHTML === richtigeAntwort) {
+    score++;
+    good.play();
+  } else {
+    bad.play();
+  }
+
+  // Färbe die richtige Antwort grün
+  lis.forEach(li => {
+    if (li.innerHTML === richtigeAntwort) {
+      li.style.backgroundColor = 'forestgreen';
     }
+  });
+
+  // 2 Sekunden warten, dann nächste Runde
+  setTimeout(() => {
+    if (round < anzahlRunden) {
+      round++;
+      nextRound();
+    }
+  }, 2000);
+}
+
 
     function nextRound() {
       getOptions()
@@ -293,7 +248,6 @@ li {
       frage.innerHTML = `Frage: ${Math.min(anzahlRunden, round + 1)} / ${anzahlRunden}`
       punkte.innerHTML = `Richtige: ${score}`
       if (round < anzahlRunden) {
-        size = [img.width, img.height]
         time++
         ctx.clearRect(0, 0, size[0], size[1])
         showCircle(auswahl[round].pos)
@@ -311,7 +265,7 @@ li {
       let x = pos[0] * size[0] / 400
       let y = pos[1] * size[1] / 682
       let rad = 10 * size[0] / 400
-      let val = (time % 60) / 60
+      let val = (time % 60) / 90 + .3
       ctx.fillStyle = `rgba(255, 0, 0, ${val})`
       ctx.beginPath()
       ctx.arc(x, y, rad, Math.PI * 2, 0)
